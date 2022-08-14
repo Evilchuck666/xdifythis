@@ -9,42 +9,52 @@ apiSecret = os.getenv('API_SECRET')
 accessToken = os.getenv('ACCESS_TOKEN')
 accessTokenSecret = os.getenv('ACCESS_TOKEN_SECRET')
 
+userName = os.getenv('USER_NAME')
+lastIdFile = os.getenv('LAST_ID_FILE')
+
 auth = tweepy.OAuth1UserHandler(apiKey, apiSecret, accessToken, accessTokenSecret)
 
 api = tweepy.API(auth)
 
-def getLastTweet(file):
-    f = open(file, 'r')
-    lastId = int(f.read().strip())
-    f.close()
-    return lastId
 
-def putLastTweet(file, lastId):
+def get_last_tweet(file):
+    f = open(file, 'r')
+    last_id = int(f.read().strip())
+    f.close()
+    return last_id
+
+
+def put_last_tweet(file, last_id):
     f = open(file, 'w')
-    f.write(str(lastId))
+    f.write(str(last_id))
     f.close()
     return
 
-def answerTweets(file='lastId.txt'):
-    lastId = getLastTweet(file)
 
-    mentions = api.mentions_timeline(since_id=lastId, tweet_mode='extended')
-    if len(mentions) == 0:
+def quote_tweet(tweet_id):
+    tweet = api.get_status(tweet_id, tweet_mode='extended')
+    url = "https://twitter.com/{}/status/{}".format(tweet.author.screen_name, tweet_id)
+    api.update_status("XD", attachment_url=url)
+
+
+def get_timeline(file=lastIdFile):
+    last_id = get_last_tweet(file)
+
+    replies = api.search_tweets(q=userName, since_id=last_id, tweet_mode='extended')
+    if len(replies) == 0:
         return
 
     new_id = 1558482514758467586
 
-    for mention in reversed(mentions):
-        newId = mention.id
-        print(mention.full_text)
+    for reply in reversed(replies):
+        new_id = reply.id
+        parent_tweet_id = reply.in_reply_to_status_id
+        parent_tweet = api.get_status(parent_tweet_id, tweet_mode='extended')
+        print(parent_tweet.full_text)
+        quote_tweet(parent_tweet_id)
 
-    putLastTweet(file, newId)
+    put_last_tweet(file, new_id)
+
 
 if __name__ == '__main__':
-    answerTweets()
-
-# user = api.get_user(screen_name='xdifythis')
-# #api.update_status(status="Hello World! I'm programming a bot!")
-#
-# tweets = api.user_timeline(screen_name='AntonioMiraflo1', count=1)
-# print(tweets[0].text)
+    get_timeline()
