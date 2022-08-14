@@ -1,16 +1,20 @@
-# This is a sample Python script.
+import tweepy
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+apiKey = os.getenv('API_KEY')
+apiSecret = os.getenv('API_SECRET')
 
+accessToken = os.getenv('ACCESS_TOKEN')
+accessTokenSecret = os.getenv('ACCESS_TOKEN_SECRET')
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+auth = tweepy.OAuth1UserHandler(apiKey, apiSecret, accessToken, accessTokenSecret)
 
+api = tweepy.API(auth)
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+user = api.get_user(screen_name='xdifythis')
+#api.update_status(status="Hello World! I'm programming a bot!")
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+tweets = api.user_timeline(screen_name='AntonioMiraflo1', count=1)
+print(tweets[0].text)
