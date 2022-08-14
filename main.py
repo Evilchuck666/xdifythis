@@ -16,44 +16,41 @@ auth = tweepy.OAuth1UserHandler(apiKey, apiSecret, accessToken, accessTokenSecre
 
 api = tweepy.API(auth)
 
+baseTwitterStatusUrl = "https://twitter.com/{}/status/{}"
 
-def get_last_tweet(file):
-    f = open(file, 'r')
-    last_id = int(f.read().strip())
-    f.close()
+
+def get_last_tweet():
+    last_id = api.user_timeline(screen_name=userName, count=1)[0].id
     return last_id
 
 
-def put_last_tweet(file, last_id):
-    f = open(file, 'w')
-    f.write(str(last_id))
-    f.close()
-    return
+def quote_tweet(reply):
+    parent_tweet = reply.in_reply_to_status_id
+    mentioned_user = "@{}".format(reply.user.screen_name)
+
+    try:
+        tweet = api.get_status(parent_tweet, tweet_mode='extended')
+        reply_to_user = tweet.user.screen_name
+    except tweepy.Forbidden as e:
+        if e.api_codes[0] == 179:
+            reply_to_user = reply.entities['user_mentions'][0]['screen_name']
+        else:
+            raise e
+
+    url = baseTwitterStatusUrl.format(reply_to_user, parent_tweet)
+    first_tweet = api.update_status("XD", attachment_url=url)
+    api.update_status(status=mentioned_user, in_reply_to_status_id=first_tweet.id)
 
 
-def quote_tweet(tweet_id):
-    tweet = api.get_status(tweet_id, tweet_mode='extended')
-    url = "https://twitter.com/{}/status/{}".format(tweet.author.screen_name, tweet_id)
-    api.update_status("XD", attachment_url=url)
-
-
-def get_timeline(file=lastIdFile):
-    last_id = get_last_tweet(file)
+def get_timeline():
+    last_id = get_last_tweet()
 
     replies = api.search_tweets(q=userName, since_id=last_id, tweet_mode='extended')
     if len(replies) == 0:
         return
 
-    new_id = 1558482514758467586
-
-    for reply in reversed(replies):
-        new_id = reply.id
-        parent_tweet_id = reply.in_reply_to_status_id
-        parent_tweet = api.get_status(parent_tweet_id, tweet_mode='extended')
-        print(parent_tweet.full_text)
-        quote_tweet(parent_tweet_id)
-
-    put_last_tweet(file, new_id)
+    for reply in replies:
+        quote_tweet(reply)
 
 
 if __name__ == '__main__':
