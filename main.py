@@ -1,5 +1,6 @@
 import tweepy
 import os
+import random
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -17,6 +18,13 @@ auth = tweepy.OAuth1UserHandler(apiKey, apiSecret, accessToken, accessTokenSecre
 api = tweepy.API(auth)
 
 baseTwitterStatusUrl = "https://twitter.com/{}/status/{}"
+
+
+def get_random_image():
+    image_dir = "images"
+    filename = random.choice(os.listdir(image_dir))
+    path = os.path.join(image_dir, filename)
+    return path
 
 
 def get_last_tweet():
@@ -38,7 +46,8 @@ def quote_tweet(reply):
             raise e
 
     url = baseTwitterStatusUrl.format(reply_to_user, parent_tweet)
-    first_tweet = api.update_status("XD", attachment_url=url)
+    media = api.media_upload(filename=get_random_image())
+    first_tweet = api.update_status(status="", media_ids=[media.media_id], attachment_url=url)
     api.update_status(status=mentioned_user, in_reply_to_status_id=first_tweet.id)
 
 
