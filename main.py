@@ -32,6 +32,37 @@ def get_last_tweet():
     return last_id
 
 
+def am_i_getting_xdified(mentioned_user):
+    if mentioned_user.lower() == userName.lower():
+        return True
+    return False
+
+
+def get_random_tease():
+    tease_dir = "teases"
+    filename = random.choice(os.listdir(tease_dir))
+
+    while not (filename.endswith(".txt")):
+        filename = random.choice(os.listdir(tease_dir))
+
+    path = os.path.join(tease_dir, filename)
+    text_file = open(path, "r")
+    text_content = text_file.read()
+    text_file.close()
+    return text_content
+
+
+def tweet_justin(reply_id):
+    media = api.media_upload(filename=os.getenv("JUSTIN_FILE"))
+    tease = get_random_tease()
+    api.update_status(
+        status=tease,
+        media_ids=[media.media_id],
+        in_reply_to_status_id=reply_id,
+        auto_populate_reply_metadata=True
+    )
+
+
 def quote_tweet(reply):
     parent_tweet = reply.in_reply_to_status_id
     mentioned_user = "@{}".format(reply.user.screen_name)
@@ -44,6 +75,10 @@ def quote_tweet(reply):
             reply_to_user = reply.entities["user_mentions"][0]["screen_name"]
         else:
             raise e
+
+    if am_i_getting_xdified(reply_to_user):
+        tweet_justin(reply.id)
+        return
 
     url = baseTwitterStatusUrl.format(reply_to_user, parent_tweet)
     media = api.media_upload(filename=get_random_image())
