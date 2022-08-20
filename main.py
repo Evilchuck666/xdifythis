@@ -32,8 +32,8 @@ def get_last_tweet():
     return last_id
 
 
-def am_i_getting_xdified(mentioned_user):
-    if mentioned_user.lower() == userName.lower():
+def am_i_getting_xdified(user_to_reply):
+    if user_to_reply.lower() == userName.lower():
         return True
     return False
 
