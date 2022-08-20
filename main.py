@@ -21,7 +21,7 @@ baseTwitterStatusUrl = "https://twitter.com/{}/status/{}"
 
 
 def get_random_image():
-    image_dir = "images"
+    image_dir = os.getenv("MEMES_DIR")
     filename = random.choice(os.listdir(image_dir))
     path = os.path.join(image_dir, filename)
     return path
@@ -38,12 +38,9 @@ def am_i_getting_xdified(user_to_reply):
     return False
 
 
-def get_random_tease():
-    tease_dir = "teases"
+def get_random_tease_text():
+    tease_dir = os.getenv("TEASES_TEXT_DIR")
     filename = random.choice(os.listdir(tease_dir))
-
-    while not (filename.endswith(".txt")):
-        filename = random.choice(os.listdir(tease_dir))
 
     path = os.path.join(tease_dir, filename)
     text_file = open(path, "r")
@@ -52,9 +49,17 @@ def get_random_tease():
     return text_content
 
 
-def tweet_justin(reply_id):
-    media = api.media_upload(filename=os.getenv("JUSTIN_FILE"))
-    tease = get_random_tease()
+def get_random_tease_image():
+    tease_dir = os.getenv("TEASES_IMAGE_DIR")
+    filename = random.choice(os.listdir(tease_dir))
+
+    path = os.path.join(tease_dir, filename)
+    return path
+
+
+def tweet_tease(reply_id):
+    media = api.media_upload(filename=get_random_tease_image())
+    tease = get_random_tease_text()
     api.update_status(
         status=tease,
         media_ids=[media.media_id],
@@ -77,7 +82,7 @@ def quote_tweet(reply):
             raise e
 
     if am_i_getting_xdified(reply_to_user):
-        tweet_justin(reply.id)
+        tweet_tease(reply.id)
         return
 
     url = baseTwitterStatusUrl.format(reply_to_user, parent_tweet)
@@ -90,6 +95,7 @@ def get_timeline():
 
     replies = api.search_tweets(q=userName, since_id=last_id, tweet_mode="extended")
     if len(replies) == 0:
+        print("No new tweets! D:")
         return
 
     for reply in replies:
