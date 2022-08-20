@@ -4,14 +4,14 @@ import random
 from dotenv import load_dotenv
 load_dotenv()
 
-apiKey = os.getenv('API_KEY')
-apiSecret = os.getenv('API_SECRET')
+apiKey = os.getenv("API_KEY")
+apiSecret = os.getenv("API_SECRET")
 
-accessToken = os.getenv('ACCESS_TOKEN')
-accessTokenSecret = os.getenv('ACCESS_TOKEN_SECRET')
+accessToken = os.getenv("ACCESS_TOKEN")
+accessTokenSecret = os.getenv("ACCESS_TOKEN_SECRET")
 
-userName = os.getenv('USER_NAME')
-lastIdFile = os.getenv('LAST_ID_FILE')
+userName = os.getenv("USER_NAME")
+lastIdFile = os.getenv("LAST_ID_FILE")
 
 auth = tweepy.OAuth1UserHandler(apiKey, apiSecret, accessToken, accessTokenSecret)
 
@@ -37,24 +37,23 @@ def quote_tweet(reply):
     mentioned_user = "@{}".format(reply.user.screen_name)
 
     try:
-        tweet = api.get_status(parent_tweet, tweet_mode='extended')
+        tweet = api.get_status(parent_tweet, tweet_mode="extended")
         reply_to_user = tweet.user.screen_name
     except tweepy.Forbidden as e:
         if e.api_codes[0] == 179:
-            reply_to_user = reply.entities['user_mentions'][0]['screen_name']
+            reply_to_user = reply.entities["user_mentions"][0]["screen_name"]
         else:
             raise e
 
     url = baseTwitterStatusUrl.format(reply_to_user, parent_tweet)
     media = api.media_upload(filename=get_random_image())
-    first_tweet = api.update_status(status="", media_ids=[media.media_id], attachment_url=url)
-    api.update_status(status=mentioned_user, in_reply_to_status_id=first_tweet.id)
+    api.update_status(status=mentioned_user, media_ids=[media.media_id], attachment_url=url)
 
 
 def get_timeline():
     last_id = get_last_tweet()
 
-    replies = api.search_tweets(q=userName, since_id=last_id, tweet_mode='extended')
+    replies = api.search_tweets(q=userName, since_id=last_id, tweet_mode="extended")
     if len(replies) == 0:
         return
 
@@ -62,5 +61,5 @@ def get_timeline():
         quote_tweet(reply)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     get_timeline()
