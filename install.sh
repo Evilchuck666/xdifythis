@@ -25,9 +25,10 @@ fi
 
 # Download and install the latest version of PIP if it is not installed
 if ! which pip3 > /dev/null; then
-    wget https://bootstrap.pypa.io/get-pip.py;
-    python3 get-pip.py;
-    rm get-pip.py;
+    echo "Wget is not installed. Please install it and run this script again.";
+    echo "If you use Ubuntu, you can install it with the following command:";
+    echo "sudo apt install python3-pip";
+    exit 1;
 else
     echo "PIP is already installed.";
     echo "";
