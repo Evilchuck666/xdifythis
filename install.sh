@@ -25,7 +25,7 @@ fi
 
 # Download and install the latest version of PIP if it is not installed
 if ! which pip3 > /dev/null; then
-    echo "Wget is not installed. Please install it and run this script again.";
+    echo "PIP is not installed. Please install it and run this script again.";
     echo "If you use Ubuntu, you can install it with the following command:";
     echo "sudo apt install python3-pip";
     exit 1;
