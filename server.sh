@@ -19,6 +19,7 @@ echo "########################### RUNNING BOT ###########################";
 echo "###################################################################";
 echo "";
 
+cd ~/xdifythis/ || exit;
 python3 ~/xdifythis/bot.py >> ~/xdifythis/output.log 2>> ~/xdifythis/error.log;
 
 rm -rf lock;
