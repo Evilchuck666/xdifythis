@@ -20,10 +20,9 @@ api = tweepy.API(auth)
 baseTwitterStatusUrl = "https://twitter.com/{}/status/{}"
 
 
-def get_random_image():
-    image_dir = os.getenv("MEMES_DIR")
-    filename = random.choice(os.listdir(image_dir))
-    path = os.path.join(image_dir, filename)
+def get_random_image(img_dir):
+    filename = random.choice(os.listdir(img_dir))
+    path = os.path.join(img_dir, filename)
     return path
 
 
@@ -34,6 +33,12 @@ def get_last_tweet():
 
 def am_i_getting_xdified(user_to_reply):
     if user_to_reply.lower() == userName.lower():
+        return True
+    return False
+
+
+def they_want_to_insult_kreator(user_to_reply):
+    if user_to_reply.lower() == os.getenv("MY_KREATOR").lower():
         return True
     return False
 
@@ -49,16 +54,8 @@ def get_random_tease_text():
     return text_content
 
 
-def get_random_tease_image():
-    tease_dir = os.getenv("TEASES_IMAGE_DIR")
-    filename = random.choice(os.listdir(tease_dir))
-
-    path = os.path.join(tease_dir, filename)
-    return path
-
-
 def tweet_tease(reply_id):
-    media = api.media_upload(filename=get_random_tease_image())
+    media = api.media_upload(filename=get_random_image(os.getenv("TEASES_IMAGE_DIR")))
     tease = get_random_tease_text()
     api.update_status(
         status=tease,
@@ -68,9 +65,22 @@ def tweet_tease(reply_id):
     )
 
 
+def tweet_dont_dare(reply_id):
+    media = api.media_upload(filename=get_random_image(os.getenv("DONT_DIR")))
+    api.update_status(
+        status="",
+        media_ids=[media.media_id],
+        in_reply_to_status_id=reply_id,
+        auto_populate_reply_metadata=True
+    )
+
+
 def quote_tweet(reply):
-    parent_tweet = reply.in_reply_to_status_id
     mentioned_user = "@{}".format(reply.user.screen_name)
+
+    parent_tweet = reply.in_reply_to_status_id
+    if parent_tweet is None:
+        parent_tweet = reply.id
 
     try:
         tweet = api.get_status(parent_tweet, tweet_mode="extended")
@@ -85,8 +95,12 @@ def quote_tweet(reply):
         tweet_tease(reply.id)
         return
 
+    if they_want_to_insult_kreator(reply_to_user):
+        tweet_dont_dare(reply.id)
+        return
+
     url = baseTwitterStatusUrl.format(reply_to_user, parent_tweet)
-    media = api.media_upload(filename=get_random_image())
+    media = api.media_upload(filename=get_random_image(os.getenv("MEMES_DIR")))
     api.update_status(status=mentioned_user, media_ids=[media.media_id], attachment_url=url)
 
 
