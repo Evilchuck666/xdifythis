@@ -3,7 +3,7 @@ This bot is very simple and created in a couple of weekends (spending just a cou
 
 Developed in order to learn the Tweepy API and take advantage of it to laugh at stupid people on Twitter.
 
-But don't worry, I'm not a bullie.
+But don't worry, I'm not a bully.
 
 ## How it works
 It's very simple, ridiculous tweet you see, tweet you reply mentioning this bot (@xdifythis).
