@@ -14,17 +14,6 @@ else
     echo "Python3 is already installed.";
 fi
 
-# Check if we have wget installed
-if ! which wget > /dev/null; then
-    echo "";
-    echo "Wget is not installed. Please install it and run this script again.";
-    echo "If you use Ubuntu, you can install it with the following command:";
-    echo "sudo apt install wget";
-    exit 1;
-else
-    echo "Wget is already installed.";
-fi
-
 # Download and install the latest version of PIP if it is not installed
 if ! which pip3 > /dev/null; then
     echo "";
