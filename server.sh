@@ -18,6 +18,6 @@ echo "########################### RUNNING BOT ###########################";
 echo "###################################################################";
 echo "";
 
-python3 bot.py >> bot.log 2>> error.log;
+python3 bot.py >> output.log 2>> error.log;
 
 rm -rf lock;
