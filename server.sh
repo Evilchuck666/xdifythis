@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd ~/xdifythis/ || exit;
+
 # Check if lock file exists
 if [ -f "lock" ]; then
     echo "";
@@ -19,7 +21,6 @@ echo "########################### RUNNING BOT ###########################";
 echo "###################################################################";
 echo "";
 
-cd ~/xdifythis/ || exit;
 python3 ~/xdifythis/bot.py >> ~/xdifythis/output.log 2>> ~/xdifythis/error.log;
 
 rm -rf lock;
