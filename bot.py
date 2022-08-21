@@ -55,7 +55,8 @@ def get_random_tease_text():
 
 
 def tweet_tease(reply_id):
-    media = api.media_upload(filename=get_random_image(os.getenv("TEASES_IMAGE_DIR")))
+    image_file = get_random_image(os.getenv("TEASES_IMAGE_DIR"))
+    media = api.media_upload(filename=image_file)
     tease = get_random_tease_text()
     api.update_status(
         status=tease,
@@ -66,7 +67,8 @@ def tweet_tease(reply_id):
 
 
 def tweet_dont_dare(reply_id):
-    media = api.media_upload(filename=get_random_image(os.getenv("DONT_DIR")))
+    image_file = get_random_image(os.getenv("DONT_DIR"))
+    media = api.media_upload(filename=image_file)
     api.update_status(
         status="",
         media_ids=[media.media_id],
@@ -100,7 +102,8 @@ def quote_tweet(reply):
         return
 
     url = baseTwitterStatusUrl.format(reply_to_user, parent_tweet)
-    media = api.media_upload(filename=get_random_image(os.getenv("MEMES_DIR")))
+    image_file = get_random_image(os.getenv("MEMES_DIR"))
+    media = api.media_upload(filename=image_file)
     api.update_status(status=mentioned_user, media_ids=[media.media_id], attachment_url=url)
 
 
