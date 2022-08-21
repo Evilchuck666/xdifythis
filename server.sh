@@ -19,6 +19,6 @@ echo "########################### RUNNING BOT ###########################";
 echo "###################################################################";
 echo "";
 
-python3 bot.py >> output.log 2>> error.log;
+python3 ~/xdifythis/bot.py >> ~/xdifythis/output.log 2>> ~/xdifythis/error.log;
 
 rm -rf lock;
