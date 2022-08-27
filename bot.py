@@ -77,8 +77,24 @@ def tweet_dont_dare(reply_id):
     )
 
 
+def its_just_a_retweet(tweet):
+    none_reply_screen_name = tweet.in_reply_to_screen_name is None
+    none_reply_status_id = tweet.in_reply_to_status_id is None
+    none_reply_status_id_str = tweet.in_reply_to_status_id_str is None
+    none_reply_user_id = tweet.in_reply_to_user_id is None
+    none_reply_user_id_str = tweet.in_reply_to_user_id_str is None
+
+    result = none_reply_screen_name and none_reply_status_id and none_reply_status_id_str
+    result = result and none_reply_user_id and none_reply_user_id_str
+
+    return result
+
+
 def quote_tweet(reply):
     mentioned_user = "@{}".format(reply.user.screen_name)
+
+    if its_just_a_retweet(reply):
+        return
 
     parent_tweet = reply.in_reply_to_status_id
     if parent_tweet is None:
@@ -110,7 +126,8 @@ def quote_tweet(reply):
 def get_timeline():
     last_id = get_last_tweet()
 
-    replies = api.search_tweets(q=userName, since_id=last_id, tweet_mode="extended")
+    query = "{} -filter:retweets".format(userName)
+    replies = api.search_tweets(q=query, since_id=last_id, tweet_mode="extended")
     if len(replies) == 0:
         print("No new tweets! D:")
         return
