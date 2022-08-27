@@ -1,0 +1,11 @@
+[Unit]
+Description=Service for Xdifythis BOT
+
+[Service]
+User=hermes
+WorkingDirectory=/home/hermes/xdifythis
+ExecStart=/home/hermes/xdifythis/daemon.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
