@@ -12,11 +12,10 @@ apiSecret = os.getenv("API_SECRET")
 accessToken = os.getenv("ACCESS_TOKEN")
 accessTokenSecret = os.getenv("ACCESS_TOKEN_SECRET")
 
+my_kreator = os.getenv("MY_KREATOR").lower()
 userName = os.getenv("USER_NAME")
-lastIdFile = os.getenv("LAST_ID_FILE")
 
 auth = tweepy.OAuth1UserHandler(apiKey, apiSecret, accessToken, accessTokenSecret)
-
 api = tweepy.API(auth)
 
 baseTwitterStatusUrl = "https://twitter.com/{}/status/{}"
@@ -38,7 +37,7 @@ def am_i_getting_xdified(user_to_reply):
 
 
 def they_want_to_insult_kreator(user_to_reply):
-    return user_to_reply.lower() == os.getenv("MY_KREATOR").lower()
+    return user_to_reply.lower() == my_kreator
 
 
 def get_random_tease_text():
@@ -83,6 +82,18 @@ def ignore_tweet(tweet):
     return userName not in first_user
 
 
+def write_tweet(reply_to_user, parent_tweet, mentioned_user):
+    url = baseTwitterStatusUrl.format(reply_to_user, parent_tweet)
+    image_file = get_random_image(os.getenv("MEMES_DIR"))
+    media = api.media_upload(filename=image_file)
+    api.update_status(status=mentioned_user, media_ids=[media.media_id], attachment_url=url)
+
+
+def fav_tweet(tweet):
+    if not tweet.favorited:
+        tweet.favorite()
+
+
 def quote_tweet(tweet):
     mentioned_user = "@{}".format(tweet.user.screen_name)
 
@@ -110,10 +121,8 @@ def quote_tweet(tweet):
         tweet_dont_dare(tweet.id)
         return
 
-    url = baseTwitterStatusUrl.format(reply_to_user, parent_tweet)
-    image_file = get_random_image(os.getenv("MEMES_DIR"))
-    media = api.media_upload(filename=image_file)
-    api.update_status(status=mentioned_user, media_ids=[media.media_id], attachment_url=url)
+    write_tweet(reply_to_user, parent_tweet, mentioned_user)
+    fav_tweet(tweet)
 
 
 def get_timeline():
