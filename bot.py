@@ -1,7 +1,9 @@
-import tweepy
 import os
 import random
+
+import tweepy
 from dotenv import load_dotenv
+
 load_dotenv()
 
 apiKey = os.getenv("API_KEY")
@@ -32,15 +34,11 @@ def get_last_tweet():
 
 
 def am_i_getting_xdified(user_to_reply):
-    if user_to_reply.lower() == userName.lower():
-        return True
-    return False
+    return user_to_reply.lower() == userName.lower()
 
 
 def they_want_to_insult_kreator(user_to_reply):
-    if user_to_reply.lower() == os.getenv("MY_KREATOR").lower():
-        return True
-    return False
+    return user_to_reply.lower() == os.getenv("MY_KREATOR").lower()
 
 
 def get_random_tease_text():
@@ -54,27 +52,17 @@ def get_random_tease_text():
     return text_content
 
 
-def tweet_tease(reply_id):
+def tweet_tease(tweet_id):
     image_file = get_random_image(os.getenv("TEASES_IMAGE_DIR"))
     media = api.media_upload(filename=image_file)
     tease = get_random_tease_text()
-    api.update_status(
-        status=tease,
-        media_ids=[media.media_id],
-        in_reply_to_status_id=reply_id,
-        auto_populate_reply_metadata=True
-    )
+    api.update_status(status=tease, media_ids=[media.media_id], in_reply_to_status_id=tweet_id, auto_populate_reply_metadata=True)
 
 
-def tweet_dont_dare(reply_id):
+def tweet_dont_dare(tweet_id):
     image_file = get_random_image(os.getenv("DONT_DIR"))
     media = api.media_upload(filename=image_file)
-    api.update_status(
-        status="",
-        media_ids=[media.media_id],
-        in_reply_to_status_id=reply_id,
-        auto_populate_reply_metadata=True
-    )
+    api.update_status(status="", media_ids=[media.media_id], in_reply_to_status_id=tweet_id, auto_populate_reply_metadata=True)
 
 
 def its_just_a_retweet(tweet):
@@ -90,31 +78,36 @@ def its_just_a_retweet(tweet):
     return result
 
 
-def quote_tweet(reply):
-    mentioned_user = "@{}".format(reply.user.screen_name)
+def ignore_tweet(tweet):
+    first_user = tweet.full_text[tweet.display_text_range[0]:].lower()
+    return userName not in first_user
 
-    if its_just_a_retweet(reply):
+
+def quote_tweet(tweet):
+    mentioned_user = "@{}".format(tweet.user.screen_name)
+
+    if ignore_tweet(tweet) or its_just_a_retweet(tweet):
         return
 
-    parent_tweet = reply.in_reply_to_status_id
+    parent_tweet = tweet.in_reply_to_status_id
     if parent_tweet is None:
-        parent_tweet = reply.id
+        parent_tweet = tweet.id
 
     try:
         tweet = api.get_status(parent_tweet, tweet_mode="extended")
         reply_to_user = tweet.user.screen_name
     except tweepy.Forbidden as e:
         if e.api_codes[0] == 179:
-            reply_to_user = reply.entities["user_mentions"][0]["screen_name"]
+            reply_to_user = tweet.entities["user_mentions"][0]["screen_name"]
         else:
             raise e
 
     if am_i_getting_xdified(reply_to_user):
-        tweet_tease(reply.id)
+        tweet_tease(tweet.id)
         return
 
     if they_want_to_insult_kreator(reply_to_user):
-        tweet_dont_dare(reply.id)
+        tweet_dont_dare(tweet.id)
         return
 
     url = baseTwitterStatusUrl.format(reply_to_user, parent_tweet)
@@ -124,16 +117,19 @@ def quote_tweet(reply):
 
 
 def get_timeline():
-    last_id = get_last_tweet()
+    tweets = get_latest_tweets()
 
+    for tweet in tweets:
+        quote_tweet(tweet)
+
+
+def get_latest_tweets():
+    last_id = get_last_tweet()
     query = "{} -filter:retweets".format(userName)
     replies = api.search_tweets(q=query, since_id=last_id, tweet_mode="extended")
     if len(replies) == 0:
         print("No new tweets! D:")
-        return
-
-    for reply in replies:
-        quote_tweet(reply)
+    return replies
 
 
 if __name__ == "__main__":
