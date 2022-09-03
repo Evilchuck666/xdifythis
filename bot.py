@@ -79,7 +79,12 @@ def its_just_a_retweet(tweet):
 
 def ignore_tweet(tweet):
     first_user = tweet.full_text[tweet.display_text_range[0]:].lower()
-    return userName not in first_user
+    if userName not in first_user:
+        return True
+    else:
+        tweet_text = tweet.full_text[tweet.display_text_range[0]:].lower()
+        stripped_text = tweet_text.strip()
+        return stripped_text != "@xdifythis play"
 
 
 def write_tweet(reply_to_user, parent_tweet, mentioned_user):
@@ -138,7 +143,7 @@ def get_timeline():
 
 def get_latest_tweets():
     last_id = get_last_tweet()
-    query = "{} -filter:retweets".format(userName)
+    query = "{} play -filter:retweets".format(userName)
     replies = api.search_tweets(q=query, since_id=last_id, tweet_mode="extended")
     if len(replies) == 0:
         print("No new tweets! D:")
