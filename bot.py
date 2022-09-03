@@ -94,6 +94,13 @@ def fav_tweet(tweet):
         tweet.favorite()
 
 
+def tweet_candado(tweet_id):
+    image_file = get_random_image(os.getenv("CHAIN_DIR"))
+    media = api.media_upload(filename=image_file)
+    api.update_status(status="Cuenta candado...", media_ids=[media.media_id], in_reply_to_status_id=tweet_id, auto_populate_reply_metadata=True)
+    return
+
+
 def quote_tweet(tweet):
     mentioned_user = "@{}".format(tweet.user.screen_name)
 
@@ -105,24 +112,21 @@ def quote_tweet(tweet):
         parent_tweet = tweet.id
 
     try:
-        tweet = api.get_status(parent_tweet, tweet_mode="extended")
-        reply_to_user = tweet.user.screen_name
-    except tweepy.Forbidden as e:
-        if e.api_codes[0] == 179:
-            reply_to_user = tweet.entities["user_mentions"][0]["screen_name"]
-        else:
-            raise e
+        answer_tweet = api.get_status(parent_tweet, tweet_mode="extended")
+        reply_to_user = answer_tweet.user.screen_name
 
-    if am_i_getting_xdified(reply_to_user):
-        tweet_tease(tweet.id)
-        return
+        if am_i_getting_xdified(reply_to_user):
+            tweet_tease(answer_tweet.id)
+            return
 
-    if they_want_to_insult_kreator(reply_to_user):
-        tweet_dont_dare(tweet.id)
-        return
+        if they_want_to_insult_kreator(reply_to_user):
+            tweet_dont_dare(answer_tweet.id)
+            return
 
-    write_tweet(reply_to_user, parent_tweet, mentioned_user)
-    fav_tweet(tweet)
+        write_tweet(reply_to_user, parent_tweet, mentioned_user)
+        fav_tweet(tweet)
+    except tweepy.Forbidden:
+        return tweet_candado(tweet.id)
 
 
 def get_timeline():
